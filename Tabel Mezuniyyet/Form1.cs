@@ -1,4 +1,6 @@
-﻿namespace Tabel_Mezuniyyet
+﻿using ClosedXML.Excel;
+
+namespace Tabel_Mezuniyyet
 {
     public partial class Form1 : Form
     {
@@ -14,7 +16,6 @@
                 Filter = "Excel Dosyası|*.xlsx",
                 Title = "Excel faylını seçin"
             };
-
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 string filePath = ofd.FileName;
@@ -28,8 +29,8 @@
         {
             using (var workbook = new ClosedXML.Excel.XLWorkbook(filePath))
             {
-                var jurnalSheet = workbook.Worksheet("jurnal");
-                var templateSheetName = "template";
+                var jurnalSheet = workbook.Worksheet("Jurnal");
+                var templateSheetName = "xxx";
 
                 if (!workbook.Worksheets.Contains(templateSheetName))
                 {
@@ -38,17 +39,14 @@
                 }
 
                 var templateSheet = workbook.Worksheet(templateSheetName);
-
                 int lastRow = jurnalSheet.LastRowUsed().RowNumber();
-
                 int adColumnIndex = 3;        // C sütunu → tam ad (Soyad Ad Ata adı)
                 int vezifeColumnIndex = 4;    // D sütunu → Vəzifə
-                int gunColumnIndex = 7;       // G sütunu → Məzuniyyət günləri
-                int tarixColumnIndex = 9;     // I sütunu → İşə başlama tarixi
-                int finColumnIndex = 10;      // J sütunu → Fin Kod
-                int omarColumnIndex = 12;     // L sütunu → Unikal sheet adı üçün
-
-                int startRow = 4; // İşçilər 4-cü sətirdən başlayır
+                int gunColumnIndex = 8;       // H sütunu → Məzuniyyət günləri
+                int tarixColumnIndex = 10;    // J sütunu → İşə başlama tarixi
+                int finColumnIndex = 5;       // E sütunu → Fin Kod
+                int omarColumnIndex = 13;     // M sütunu → Unikal sheet adı üçün
+                int startRow = 4;
 
                 for (int row = startRow; row <= lastRow; row++)
                 {
@@ -56,17 +54,28 @@
                     if (string.IsNullOrEmpty(fullName))
                         continue;
 
-                    // Sheet adını L sütunundan götür (ömər sütunu)
                     var sheetName = jurnalSheet.Cell(row, omarColumnIndex).GetString().Trim();
                     if (string.IsNullOrEmpty(sheetName))
                         continue;
 
-                    // Əgər sheet varsa, yeni sheet yaratma
                     if (workbook.Worksheets.Any(ws => ws.Name.Equals(sheetName, StringComparison.OrdinalIgnoreCase)))
                         continue;
 
-                    // Yeni sheet yarat və məlumatları yaz
+                    // Yeni sheet yarat
                     var newSheet = templateSheet.CopyTo(sheetName);
+
+                    // *** SHEET TAB RƏNGINI DƏYIŞ ***
+                    newSheet.SetTabColor(XLColor.Yellow);  // Yaşıl rəng
+                                                          // Və ya digər rənglər:
+                                                          // newSheet.SetTabColor(XLColor.Red);
+                                                          // newSheet.SetTabColor(XLColor.Blue);
+                                                          // newSheet.SetTabColor(XLColor.Orange);
+                                                          // newSheet.SetTabColor(XLColor.Yellow);
+                                                          // newSheet.SetTabColor(XLColor.Purple);
+
+                    // Və ya RGB ilə xüsusi rəng:
+                    // newSheet.SetTabColor(XLColor.FromArgb(255, 192, 203)); // Çəhrayı
+
                     newSheet.SetAutoFilter(false);
                     if (newSheet.AutoFilter != null)
                         newSheet.AutoFilter.Clear();
@@ -84,7 +93,6 @@
                 }
 
                 workbook.Save();
-
                 MessageBox.Show("Yeni sheetlər yaradıldı və fayl üzərinə yazıldı.");
             }
         }
