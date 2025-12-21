@@ -30,7 +30,7 @@ namespace Tabel_Mezuniyyet
             using (var workbook = new ClosedXML.Excel.XLWorkbook(filePath))
             {
                 var jurnalSheet = workbook.Worksheet("Jurnal");
-                var templateSheetName = "xxx";
+                var templateSheetName = "yyy";
 
                 if (!workbook.Worksheets.Contains(templateSheetName))
                 {
